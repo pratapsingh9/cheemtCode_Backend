@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int         @id @default(autoincrement())
+  email       String      @unique
+  name        String
+  password    String
+  communities Community[] // User can create or join many communities
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  messages    Message[] // Relationship to Message model
+}
+
+model Community {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  category    String
+  coverImage  String?
+  privacy     Privacy
+  creator     User     @relation(fields: [creatorId], references: [id])
+  creatorId   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  messages Message[] // Relationship to Message model
+}
+
+enum Privacy {
+  PUBLIC
+  PRIVATE
+}
+
+model Message {
+  id          Int       @id @default(autoincrement())
+  content     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  author      User      @relation(fields: [authorId], references: [id])
+  authorId    Int
+  community   Community @relation(fields: [communityId], references: [id])
+  communityId Int
+}
+
+model Question {
+  id              Int      @id @default(autoincrement())
+  title           String
+  difficulty      Int
+  topics          String[] // Array of strings for topics
+  description     String
+  exampleTestCase String
+  defaultCode     String
+}
